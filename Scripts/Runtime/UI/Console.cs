@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using Louis.CustomPackages.CommandLineInterface.Core;
+using Louis.CustomPackages.CommandLineInterface.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -10,6 +11,7 @@ using UnityEngine.UIElements;
 #if USE_VCONTAINER
 using VContainer;
 #endif
+using ILogDispatcher = Louis.CustomPackages.CommandLineInterface.Logging.ILogDispatcher;
 
 namespace Louis.CustomPackages.CommandLineInterface.UI {
     public interface IConsole {
@@ -23,7 +25,7 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
         int _frameClosed = -1;
 
 #if USE_VCONTAINER
-        [Inject] readonly ICommandOutputProvider _outputProvider;
+        [Inject] readonly IOutputRegistry _outputProvider;
         [Inject] readonly ICommandRegistry _commandRegistry;
         [Inject] readonly ICommandHandler _commandHandler;
 #else
@@ -33,7 +35,7 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
         [SerializeField] CommandLogger _outputProvider;
 #endif
 
-        ICommandOutputProvider OutputProvider => _outputProvider;
+        IOutputRegistry OutputProvider => _outputProvider;
         ICommandHandler CommandHandler => _commandHandler;
         ICommandRegistry CommandRegistry => _commandRegistry;
 
@@ -274,18 +276,18 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
         }
 
         #region Command Line Functions
-        UniTask Echo(ICommandLogger logger, BoundArgs args, CancellationToken token) {
+        UniTask Echo(ILogDispatcher logger, BoundArgs args, CancellationToken token) {
             Write($"> {args.Get<string>("output")}");
             return UniTask.CompletedTask;
         }
 
-        UniTask Clear(ICommandLogger logger, BoundArgs args, CancellationToken token) {
+        UniTask Clear(ILogDispatcher logger, BoundArgs args, CancellationToken token) {
             SetOutputVisibility(true);
             _outputScroll.Clear();
             return UniTask.CompletedTask;
         }
 
-        UniTask SetConsoleMode(ICommandLogger logger, BoundArgs args, CancellationToken token) {
+        UniTask SetConsoleMode(ILogDispatcher logger, BoundArgs args, CancellationToken token) {
             var mode = args.Get<ConsoleMode>("mode");
             Mode = mode;
             logger.Log(this, $"Set Console Mode to {Mode}");

@@ -5,6 +5,7 @@ using Louis.CustomPackages.CommandLineInterface.OSC;
 using Louis.CustomPackages.CommandLineInterface.UI;
 using UnityEditor;
 using UnityEngine;
+using LogDispatcher = Louis.CustomPackages.CommandLineInterface.Logging.LogDispatcher;
 using CommandHandler = Louis.CustomPackages.CommandLineInterface.Core.CommandHandler;
 
 namespace Louis.CustomPackages.CommandLineInterface.Editor {
@@ -32,7 +33,7 @@ namespace Louis.CustomPackages.CommandLineInterface.Editor {
 
                 // --- Part A: Inject Backend Logic Components ---
                 if(handler != null) {
-                    handler.TryGetComponent<CommandLogger>(out var logger);
+                    handler.TryGetComponent<LogDispatcher>(out var logger);
                     handler.TryGetComponent<CommandRegistry>(out var registry);
                     handler.TryGetComponent<CommandCompiler>(out var compiler);
 

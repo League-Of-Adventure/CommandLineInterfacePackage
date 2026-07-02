@@ -1,0 +1,14 @@
+{
+    "name": "com.Louis.CommandLineInterface.Logs",
+    "rootNamespace": "Louis.CustomPackages.CommandLineInterface.Logs",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

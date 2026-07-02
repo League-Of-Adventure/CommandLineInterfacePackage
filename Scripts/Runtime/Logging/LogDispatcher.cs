@@ -3,9 +3,24 @@ using System.Collections.Generic;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Louis.CustomPackages.CommandLineInterface.Core {
+namespace Louis.CustomPackages.CommandLineInterface.Logging {
+    public interface ILogDispatcher {
+        void Log(Object sender, string message, LogLevel level = LogLevel.Info);
+        void Log(object sender, string message, LogLevel level = LogLevel.Info);
+        void Log(string message, LogLevel level = LogLevel.Info);
+    }
+
+    public interface IOutput {
+        void Write(Log log);
+    }
+
+    public interface IOutputRegistry {
+        void AttachOutput(IOutput output);
+        void DetachOutput(IOutput output);
+    }
+
     [AddComponentMenu("Command Line Interface/Command Logger")]
-    public class CommandLogger : MonoBehaviour, ICommandOutputProvider, ICommandLogger, IOutput {
+    public class LogDispatcher : MonoBehaviour, IOutputRegistry, ILogDispatcher, IOutput {
         [Header("Settings")]
         [SerializeField] bool _outputToConsole = true;
         readonly HashSet<IOutput> _outputSet = new();
@@ -20,7 +35,7 @@ namespace Louis.CustomPackages.CommandLineInterface.Core {
 
         public void Log(Object sender, string message, LogLevel level = LogLevel.Info) => Output(new Log(level, sender.name, message));
         public void Log(object sender, string message, LogLevel level = LogLevel.Info) => Output(new Log(level, sender.ToString(), message));
-        public void Log(string message, LogLevel level = LogLevel.Info) => Output(new Core.Log(level, message));
+        public void Log(string message, LogLevel level = LogLevel.Info) => Output(new Log(level, message));
 
         void Output(Log log) {
             Write(log);
@@ -78,5 +93,15 @@ namespace Louis.CustomPackages.CommandLineInterface.Core {
                 return $"<b><color={color}>{prefix}</color> - {sender}</b>{message}";
             }
         }
+    }
+
+    [Flags]
+    public enum LogLevel {
+        Debug       = 0,
+        Info        = 1,
+        Analytics   = 2,
+        Success     = 4,
+        Warning     = 8,
+        Error       = 16
     }
 }

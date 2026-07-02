@@ -1,21 +1,24 @@
 using Cysharp.Threading.Tasks;
 using Louis.CustomPackages.CommandLineInterface.Core.Exceptions;
+using Louis.CustomPackages.CommandLineInterface.Logging;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using UnityEngine;
+using ILogDispatcher = Louis.CustomPackages.CommandLineInterface.Logging.ILogDispatcher;
+using LogDispatcher = Louis.CustomPackages.CommandLineInterface.Logging.LogDispatcher;
 [assembly: InternalsVisibleTo("com.Louis.CommandLineInterface.Tests")]
 
 namespace Louis.CustomPackages.CommandLineInterface.Core {
     [AddComponentMenu("Command Line Interface/Command Handler")]
-    [RequireComponent(typeof(CommandLogger))]
+    [RequireComponent(typeof(LogDispatcher))]
     [RequireComponent(typeof(CommandRegistry))]
     [RequireComponent(typeof(CommandCompiler))]
     public class CommandHandler : MonoBehaviour, ICommandHandler {
         CancellationTokenSource _cts = new();
         readonly Queue<Command> _commandQueue = new();
-        ICommandLogger _logger;
+        ILogDispatcher _logger;
         ICommandRegistry _registry;
         ICommandCompiler _compiler;
 
@@ -118,7 +121,7 @@ namespace Louis.CustomPackages.CommandLineInterface.Core {
             }
         }
 
-        async UniTask CancelAll(ICommandLogger logger, BoundArgs args, CancellationToken cancellationToken) {
+        async UniTask CancelAll(ILogDispatcher logger, BoundArgs args, CancellationToken cancellationToken) {
             _logger.Log("CommandManager", "Cancelling all current actions and clearing command buffer", LogLevel.Warning);
             _cts.Cancel();
             _cts = new();
@@ -128,7 +131,7 @@ namespace Louis.CustomPackages.CommandLineInterface.Core {
             ProcessCommands(_cts.Token);
         }
 
-        UniTask ShowHelpText(ICommandLogger logger, BoundArgs args, CancellationToken cancellationToken) {
+        UniTask ShowHelpText(ILogDispatcher logger, BoundArgs args, CancellationToken cancellationToken) {
             string functionName = args.Get<string>("functionName");
             string helpText;
             if(string.IsNullOrWhiteSpace(functionName)) {

@@ -1,11 +1,13 @@
 using Cysharp.Threading.Tasks;
 using Louis.CustomPackages.CommandLineInterface.Core;
+using Louis.CustomPackages.CommandLineInterface.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
+using ILogDispatcher = Louis.CustomPackages.CommandLineInterface.Logging.ILogDispatcher;
 
 namespace com.Louis.CommandLineInterface.Commands {
 #if USE_VCONTAINER
@@ -55,7 +57,7 @@ namespace com.Louis.CommandLineInterface.Commands {
             _cts?.Dispose();
         }
 
-        UniTask RunRepeated(ICommandLogger logger, BoundArgs args, CancellationToken _) {
+        UniTask RunRepeated(ILogDispatcher logger, BoundArgs args, CancellationToken _) {
             string command = args.Get<string>("command");
             float interval = args.Get<float>("interval");
             string key = args.Get<string>("key");
@@ -80,7 +82,7 @@ namespace com.Louis.CommandLineInterface.Commands {
             return UniTask.CompletedTask;
         }
 
-        UniTask StopRepeated(ICommandLogger logger, BoundArgs args, CancellationToken cancellationToken) {
+        UniTask StopRepeated(ILogDispatcher logger, BoundArgs args, CancellationToken cancellationToken) {
             string key = args.Get<string>("key");
             if(_runningOperations.TryGetValue(key, out var cts)) {
                 cts.Cancel();
@@ -101,9 +103,8 @@ namespace com.Louis.CommandLineInterface.Commands {
                     _commandHandler.PushCommand(command);
                     await UniTask.Delay(TimeSpan.FromSeconds(interval), cancellationToken: cancellationToken);
                 }
-            } catch(OperationCanceledException) { }
-            finally {
-                if (_runningOperations.ContainsKey(key) && cancellationToken.IsCancellationRequested) {
+            } catch(OperationCanceledException) { } finally {
+                if(_runningOperations.ContainsKey(key) && cancellationToken.IsCancellationRequested) {
                     _runningOperations.Remove(key);
                 }
             }

@@ -5,6 +5,7 @@ using Louis.CustomPackages.CommandLineInterface.UI;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
+using Louis.CustomPackages.CommandLineInterface.Logging;
 
 #if USE_VCONTAINER
 namespace com.Louis.CommandLineInterface.VContainer {
@@ -13,8 +14,8 @@ namespace com.Louis.CommandLineInterface.VContainer {
         [Header("Command Line References")]
         [SerializeField] CommandHandler _commandHandler;
         [SerializeField] CommandRegistry _commandRegistry;
-        [SerializeField] CommandLogger _commandLogger;
         [SerializeField] CommandCompiler _commandCompiler;
+        [SerializeField] LogDispatcher _commandLogger;
         [SerializeField] Console _console;
 
         [SerializeField] InputProvider _inputProvider;
@@ -23,11 +24,14 @@ namespace com.Louis.CommandLineInterface.VContainer {
             // Core Components
             builder.RegisterComponent(_commandHandler).AsImplementedInterfaces();
             builder.RegisterComponent(_commandRegistry).AsImplementedInterfaces();
-            builder.RegisterComponent(_commandLogger).AsImplementedInterfaces();
             builder.RegisterComponent(_commandCompiler).AsImplementedInterfaces();
+            builder.RegisterComponent(_commandLogger).AsImplementedInterfaces();
+            builder.RegisterBuildCallback(resolver => {
+                LogDispatch.Init(resolver.Resolve<ILogDispatcher>());
+            });
 
             // Input Provider for the Command Input Mapper
-            if (_inputProvider != null)
+            if(_inputProvider != null)
                 builder.RegisterComponent(_inputProvider).AsImplementedInterfaces();
 
             if(_console != null)

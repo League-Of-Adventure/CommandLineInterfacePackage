@@ -2,6 +2,7 @@
     "name": "com.Louis.CommandLineInterface.Commands",
     "rootNamespace": "Louis.CustomPackages.CommandLineInterface.Commands",
     "references": [
+        "GUID:666aece0c2a45a34dba56b8ea99b89ae",
         "GUID:566c6a0b185784248a723baf119580e8",
         "GUID:b0214a6008ed146ff8f122a6a9c2f6cc",
         "GUID:f51ebe6a0ceec4240a699833d6309b23"

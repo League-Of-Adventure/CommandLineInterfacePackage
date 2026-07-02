@@ -4,17 +4,18 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using ILogDispatcher = Louis.CustomPackages.CommandLineInterface.Logging.ILogDispatcher;
 
 namespace Louis.CustomPackages.CommandLineInterface.Core {
     [AddComponentMenu("Command Line Interface/Command Registry")]
     public class CommandRegistry : MonoBehaviour, ICommandRegistry {
         readonly Dictionary<string, CommandSchema> _schemaMap = new(StringComparer.OrdinalIgnoreCase);
-        readonly Dictionary<string, Func<ICommandLogger, BoundArgs, CancellationToken, UniTask>> _funcMap = new(StringComparer.OrdinalIgnoreCase);
+        readonly Dictionary<string, Func<ILogDispatcher, BoundArgs, CancellationToken, UniTask>> _funcMap = new(StringComparer.OrdinalIgnoreCase);
 
         public IReadOnlyDictionary<string, CommandSchema> Schemas => _schemaMap;
-        public IReadOnlyDictionary<string, Func<ICommandLogger, BoundArgs, CancellationToken, UniTask>> Callbacks => _funcMap;
+        public IReadOnlyDictionary<string, Func<ILogDispatcher, BoundArgs, CancellationToken, UniTask>> Callbacks => _funcMap;
 
-        public void RegisterCommand(string command, CommandSchema schema, Func<ICommandLogger, BoundArgs, CancellationToken, UniTask> callback) {
+        public void RegisterCommand(string command, CommandSchema schema, Func<ILogDispatcher, BoundArgs, CancellationToken, UniTask> callback) {
             if(_schemaMap.ContainsKey(command)) throw new KeywordAlreadyExistsException($"Cannot register {command}. It is already registered");
             _schemaMap[command] = schema ?? throw new NullReferenceException($"Cannot register null as a schema for command {command}");
             _funcMap[command] = callback ?? throw new NullReferenceException($"Cannot register null as a function to call for command {command}");
