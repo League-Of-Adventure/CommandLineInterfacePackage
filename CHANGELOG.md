@@ -44,3 +44,7 @@
 
 ## [1.6.0] - 08/06/2026
 - Added first of many built in commands to add utility to command list
+
+## [1.7.1] - 02/07/2026
+- Split Logging into a separate Asmdef
+- Created static LogDispatch class so that non-command operations can still log to the console

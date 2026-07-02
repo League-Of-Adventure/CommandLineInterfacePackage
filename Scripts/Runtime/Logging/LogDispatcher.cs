@@ -19,7 +19,7 @@ namespace Louis.CustomPackages.CommandLineInterface.Logging {
         void DetachOutput(IOutput output);
     }
 
-    [AddComponentMenu("Command Line Interface/Command Logger")]
+    [AddComponentMenu("Command Line Interface/Logger")]
     public class LogDispatcher : MonoBehaviour, IOutputRegistry, ILogDispatcher, IOutput {
         [Header("Settings")]
         [SerializeField] bool _outputToConsole = true;
