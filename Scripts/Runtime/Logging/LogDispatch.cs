@@ -1,6 +1,14 @@
 using UnityEngine;
+using VContainer.Unity;
 
 namespace Louis.CustomPackages.CommandLineInterface.Logging {
+    public class LogDispatcherInitializationBridge : IInitializable {
+        readonly ILogDispatcher _logDispatcher;
+        public LogDispatcherInitializationBridge(ILogDispatcher logDispatcher) => _logDispatcher = logDispatcher;
+        public void Initialize() => LogDispatch.Init(_logDispatcher);
+    }
+
+
     public static class LogDispatch {
         public static ILogDispatcher _logger;
         public static void Init(ILogDispatcher logger) {

@@ -26,9 +26,7 @@ namespace com.Louis.CommandLineInterface.VContainer {
             builder.RegisterComponent(_commandRegistry).AsImplementedInterfaces();
             builder.RegisterComponent(_commandCompiler).AsImplementedInterfaces();
             builder.RegisterComponent(_commandLogger).AsImplementedInterfaces();
-            builder.RegisterBuildCallback(resolver => {
-                LogDispatch.Init(resolver.Resolve<ILogDispatcher>());
-            });
+            builder.RegisterEntryPoint<LogDispatcherInitializationBridge>();
 
             // Input Provider for the Command Input Mapper
             if(_inputProvider != null)
@@ -38,7 +36,7 @@ namespace com.Louis.CommandLineInterface.VContainer {
                 builder.RegisterComponent(_console).AsImplementedInterfaces();
 
             // Command Runners
-            builder.RegisterEntryPoint<RunRepeatedCommand>().AsSelf();
+            builder.RegisterEntryPoint<RunRepeatedCommand>();
         }
     }
 }
