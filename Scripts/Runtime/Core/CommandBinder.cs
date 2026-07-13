@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Unity.Plastic.Newtonsoft.Json;
+using UnityEngine;
 
 namespace Louis.CustomPackages.CommandLineInterface.Core {
     internal static class CommandBinder {
@@ -41,10 +41,10 @@ namespace Louis.CustomPackages.CommandLineInterface.Core {
                         converted = Enum.Parse(arg.Type, raw, ignoreCase: true);
                     } else if(arg.Type.IsArray) {
                         // Array support: T[]
-                        converted = JsonConvert.DeserializeObject(raw, arg.Type);
+                        converted = JsonUtility.FromJson(raw, arg.Type);
                     } else if(arg.Type != typeof(string) && !arg.Type.IsPrimitive) {
                         // JSON object -> Custom class
-                        converted = JsonConvert.DeserializeObject(raw, arg.Type);
+                        converted = JsonUtility.FromJson(raw, arg.Type);
                     } else {
                         // Fallback for primitives
                         converted = Convert.ChangeType(raw, arg.Type);
