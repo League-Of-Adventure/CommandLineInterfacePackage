@@ -57,7 +57,7 @@ namespace com.Louis.CommandLineInterface.Commands {
             _cts?.Dispose();
         }
 
-        UniTask RunRepeated(ILogDispatcher logger, BoundArgs args, CancellationToken _) {
+        UniTask RunRepeated(BoundArgs args, CancellationToken _) {
             string command = args.Get<string>("command");
             float interval = args.Get<float>("interval");
             string key = args.Get<string>("key");
@@ -66,31 +66,31 @@ namespace com.Louis.CommandLineInterface.Commands {
                 key = Guid.NewGuid().ToString();
 
             if(interval < 0) {
-                logger.Log(this, $"Cannot run a command with interval < 0", LogLevel.Error);
+                LogDispatch.Log(this, $"Cannot run a command with interval < 0", LogLevel.Error);
                 return UniTask.CompletedTask;
             }
             if(_runningOperations.ContainsKey(key)) {
-                logger.Log(this, $"Cannot run a looping command with key={{{key}}} because one already exists with that key");
+                LogDispatch.Log(this, $"Cannot run a looping command with key={{{key}}} because one already exists with that key");
                 return UniTask.CompletedTask;
             }
 
             CancellationTokenSource cts = new();
             _runningOperations.Add(key, cts);
             CancellationToken cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, _cts.Token).Token;
-            logger.Log(this, $"Started looping command with key={{{key}}}");
+            LogDispatch.Log(this, $"Started looping command with key={{{key}}}");
             RunRepeated(command, interval, key, cancellationToken).Forget();
             return UniTask.CompletedTask;
         }
 
-        UniTask StopRepeated(ILogDispatcher logger, BoundArgs args, CancellationToken cancellationToken) {
+        UniTask StopRepeated(BoundArgs args, CancellationToken cancellationToken) {
             string key = args.Get<string>("key");
             if(_runningOperations.TryGetValue(key, out var cts)) {
                 cts.Cancel();
                 cts.Dispose(); // Clean up memory allocation
                 _runningOperations.Remove(key);
-                logger.Log(this, $"Cancelled looping command with key={{{key}}}");
+                LogDispatch.Log(this, $"Cancelled looping command with key={{{key}}}");
             } else {
-                logger.Log(this, $"Cannot cancel operation with key={{{key}}}. A looping operation with that key does not exist");
+                LogDispatch.Log(this, $"Cannot cancel operation with key={{{key}}}. A looping operation with that key does not exist");
             }
             return UniTask.CompletedTask;
         }

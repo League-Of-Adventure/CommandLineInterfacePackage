@@ -39,7 +39,7 @@ namespace Louis.CustomPackages.CommandLineInterface.Core {
                 "help",
                 new CommandSchema()
                     .WithDescription("Outputs a list of functions and how to use them")
-                    .Optional<string>("functionName", 0, "", "A specific function you want to know the use of")
+                    .Optional("functionName", 0, "", "A specific function you want to know the use of")
                     .ExecutesImmediately(true),
                 ShowHelpText
                 );
@@ -77,7 +77,7 @@ namespace Louis.CustomPackages.CommandLineInterface.Core {
             if(!_registry.Schemas.ContainsKey(command.CommandName)) throw new CommandException($"Internal Error, not function bound for command {command.CommandName}");
             var callback = _registry.Callbacks[command.CommandName];
             try {
-                await callback.Invoke(_logger, command.BoundArgs, token);
+                await callback.Invoke(command.BoundArgs, token);
             } catch(Exception e) {
                 _logger.Log("CommandManager", e.Message, LogLevel.Error);
             }
@@ -121,7 +121,7 @@ namespace Louis.CustomPackages.CommandLineInterface.Core {
             }
         }
 
-        async UniTask CancelAll(ILogDispatcher logger, BoundArgs args, CancellationToken cancellationToken) {
+        async UniTask CancelAll(BoundArgs args, CancellationToken cancellationToken) {
             _logger.Log("CommandManager", "Cancelling all current actions and clearing command buffer", LogLevel.Warning);
             _cts.Cancel();
             _cts = new();
@@ -131,7 +131,7 @@ namespace Louis.CustomPackages.CommandLineInterface.Core {
             ProcessCommands(_cts.Token);
         }
 
-        UniTask ShowHelpText(ILogDispatcher logger, BoundArgs args, CancellationToken cancellationToken) {
+        UniTask ShowHelpText(BoundArgs args, CancellationToken cancellationToken) {
             string functionName = args.Get<string>("functionName");
             string helpText;
             if(string.IsNullOrWhiteSpace(functionName)) {

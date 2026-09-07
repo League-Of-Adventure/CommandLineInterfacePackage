@@ -48,3 +48,6 @@
 ## [1.7.1] - 02/07/2026
 - Split Logging into a separate Asmdef
 - Created static LogDispatch class so that non-command operations can still log to the console
+
+## [1.8.4] - 07/09/2026
+- Removed ILogDispatcher as an argument from command function specification in favour of using the static class LogDispatch

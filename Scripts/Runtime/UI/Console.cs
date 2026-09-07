@@ -276,21 +276,21 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
         }
 
         #region Command Line Functions
-        UniTask Echo(ILogDispatcher logger, BoundArgs args, CancellationToken token) {
+        UniTask Echo(BoundArgs args, CancellationToken token) {
             Write($"> {args.Get<string>("output")}");
             return UniTask.CompletedTask;
         }
 
-        UniTask Clear(ILogDispatcher logger, BoundArgs args, CancellationToken token) {
+        UniTask Clear(BoundArgs args, CancellationToken token) {
             SetOutputVisibility(true);
             _outputScroll.Clear();
             return UniTask.CompletedTask;
         }
 
-        UniTask SetConsoleMode(ILogDispatcher logger, BoundArgs args, CancellationToken token) {
+        UniTask SetConsoleMode(BoundArgs args, CancellationToken token) {
             var mode = args.Get<ConsoleMode>("mode");
             Mode = mode;
-            logger.Log(this, $"Set Console Mode to {Mode}");
+            LogDispatch.Log(this, $"Set Console Mode to {Mode}");
             return UniTask.CompletedTask;
         }
         #endregion
