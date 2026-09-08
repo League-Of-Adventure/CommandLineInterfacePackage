@@ -20,9 +20,7 @@ namespace Louis.CustomPackages.CommandLineInterface.Logging {
     }
 
     [AddComponentMenu("Command Line Interface/Logger")]
-    public class LogDispatcher : MonoBehaviour, IOutputRegistry, ILogDispatcher, IOutput {
-        [Header("Settings")]
-        [SerializeField] bool _outputToConsole = true;
+    public class LogDispatcher : IOutputRegistry, ILogDispatcher, IOutput {
         readonly HashSet<IOutput> _outputSet = new();
 
         public void AttachOutput(IOutput output) {
@@ -46,7 +44,6 @@ namespace Louis.CustomPackages.CommandLineInterface.Logging {
         }
 
         public void Write(Log log) {
-            if(!_outputToConsole) return;
             Debug.Log(log.Raw);
         }
     }

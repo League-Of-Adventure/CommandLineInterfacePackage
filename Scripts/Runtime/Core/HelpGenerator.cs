@@ -9,8 +9,7 @@ namespace Louis.CustomPackages.CommandLineInterface.Core {
             var sb = new StringBuilder();
             sb.AppendLine($"Available Commands:");
 
-            foreach(var command in commands.Keys) {
-
+            foreach(var command in commands.Keys.OrderBy(c => c)) {
                 sb.AppendLine($"<indent=5%>- {command}</indent>");
                 if(!string.IsNullOrWhiteSpace((commands[command].Description)))
                     sb.AppendLine($"<indent=10%>{commands[command].Description}</indent>");

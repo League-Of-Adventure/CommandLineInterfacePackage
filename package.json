@@ -1,6 +1,6 @@
 {
     "name": "com.leagueofadventure.commandlineinterface",
-    "version": "1.8.4",
+    "version": "1.9.0",
     "displayName": "Command Line Interface Package",
     "description": "A lightweight command line package for Unity.",
     "unity": "2021.1",
@@ -10,6 +10,8 @@
         "url": "https://www.tandemsetandscenery.com/"
     },
     "dependencies": {
-        "com.cysharp.unitask": "2.5.0" 
+        "com.cysharp.unitask": "2.5.0",
+        "com.iam1337.extosc": "1.21.0",
+        "jp.hadashikick.vcontainer": "1.18.0"
     }
 }

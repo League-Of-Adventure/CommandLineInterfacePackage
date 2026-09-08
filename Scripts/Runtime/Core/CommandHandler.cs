@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using UnityEngine;
+using VContainer.Unity;
 using ILogDispatcher = Louis.CustomPackages.CommandLineInterface.Logging.ILogDispatcher;
 using LogDispatcher = Louis.CustomPackages.CommandLineInterface.Logging.LogDispatcher;
 [assembly: InternalsVisibleTo("com.Louis.CommandLineInterface.Tests")]
@@ -15,20 +16,18 @@ namespace Louis.CustomPackages.CommandLineInterface.Core {
     [RequireComponent(typeof(LogDispatcher))]
     [RequireComponent(typeof(CommandRegistry))]
     [RequireComponent(typeof(CommandCompiler))]
-    public class CommandHandler : MonoBehaviour, ICommandHandler {
+    public class CommandHandler : ICommandHandler, IInitializable, IDisposable {
         CancellationTokenSource _cts = new();
         readonly Queue<Command> _commandQueue = new();
-        ILogDispatcher _logger;
-        ICommandRegistry _registry;
-        ICommandCompiler _compiler;
+        readonly ICommandRegistry _registry;
+        readonly ICommandCompiler _compiler;
 
-        private void Awake() {
-            TryGetComponent(out _logger);
-            TryGetComponent(out _registry);
-            TryGetComponent(out _compiler);
+        public CommandHandler(ILogDispatcher logger, ICommandRegistry registry, ICommandCompiler compiler) {
+            _registry = registry;
+            _compiler = compiler;
         }
 
-        private void OnEnable() {
+        public void Initialize() {
             _registry.RegisterCommand(
                 "cancelAll",
                 new CommandSchema()
@@ -43,31 +42,28 @@ namespace Louis.CustomPackages.CommandLineInterface.Core {
                     .ExecutesImmediately(true),
                 ShowHelpText
                 );
-        }
-
-        public void Start() {
             ProcessCommands(_cts.Token);
         }
 
-        public void OnDestroy() {
+        public void Dispose() {
             _cts.Cancel();
         }
 
         async void ProcessCommands(CancellationToken token) {
-            _logger.Log("CommandManager", $"Command Processing Started: {_commandQueue.Count} unhandled commands pushed", LogLevel.Success);
+            LogDispatch.Log("CommandManager", $"Command Processing Started: {_commandQueue.Count} unhandled commands pushed", LogLevel.Success);
             while(true) {
                 if(_commandQueue.Count > 0) {
                     try {
                         await RunCommand(_commandQueue.Dequeue(), token);
                     } catch(Exception e) {
-                        _logger.Log("CommandManager", e.Message, LogLevel.Error);
+                        LogDispatch.Log("CommandManager", e.Message, LogLevel.Error);
                     }
                 } else {
                     await UniTask.Yield();
                 }
 
                 if(token.IsCancellationRequested) {
-                    _logger.Log("CommandManager", $"Cancellation Requested: {_commandQueue.Count} unhandled commands remaining", LogLevel.Warning);
+                    LogDispatch.Log("CommandManager", $"Cancellation Requested: {_commandQueue.Count} unhandled commands remaining", LogLevel.Warning);
                     return;
                 }
             }
@@ -79,7 +75,7 @@ namespace Louis.CustomPackages.CommandLineInterface.Core {
             try {
                 await callback.Invoke(command.BoundArgs, token);
             } catch(Exception e) {
-                _logger.Log("CommandManager", e.Message, LogLevel.Error);
+                LogDispatch.Log("CommandManager", e.Message, LogLevel.Error);
             }
         }
 
@@ -90,12 +86,12 @@ namespace Louis.CustomPackages.CommandLineInterface.Core {
                 var result = _compiler.TryCompile(command);
                 // Some commands are meant to skip the queue
                 if(result.succesful && command.ExecuteImmediately) {
-                    RunCommand(command, gameObject.GetCancellationTokenOnDestroy()).Forget();
+                    RunCommand(command, _cts.Token).Forget();
                 } else {
                     _commandQueue.Enqueue(command);
                 }
             } catch(Exception e) {
-                _logger.Log("CommandManager", e.Message, LogLevel.Error);
+                LogDispatch.Log("CommandManager", e.Message, LogLevel.Error);
             }
         }
 
@@ -109,20 +105,20 @@ namespace Louis.CustomPackages.CommandLineInterface.Core {
                 }
                 _commandQueue.Enqueue(command);
             } catch(Exception e) {
-                _logger.Log("CommandManager", e.Message, LogLevel.Error);
+                LogDispatch.Log("CommandManager", e.Message, LogLevel.Error);
             }
         }
 
         public void PushCommand(Command command) {
             if(command.ExecuteImmediately) {
-                RunCommand(command, gameObject.GetCancellationTokenOnDestroy()).Forget();
+                RunCommand(command, _cts.Token).Forget();
             } else {
                 _commandQueue.Enqueue(command);
             }
         }
 
         async UniTask CancelAll(BoundArgs args, CancellationToken cancellationToken) {
-            _logger.Log("CommandManager", "Cancelling all current actions and clearing command buffer", LogLevel.Warning);
+            LogDispatch.Log("CommandManager", "Cancelling all current actions and clearing command buffer", LogLevel.Warning);
             _cts.Cancel();
             _cts = new();
             _commandQueue.Clear();
@@ -140,7 +136,7 @@ namespace Louis.CustomPackages.CommandLineInterface.Core {
                 if(!_registry.Schemas.TryGetValue(functionName, out var schema)) throw new CommandArgumentException($"Function {functionName} is not a registered function");
                 helpText = HelpGenerator.GenerateUsage(functionName, schema);
             }
-            _logger.Log($"CommandManager", helpText);
+            LogDispatch.Log($"CommandManager", helpText);
             return UniTask.CompletedTask;
         }
     }

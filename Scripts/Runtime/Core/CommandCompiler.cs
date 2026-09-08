@@ -4,11 +4,11 @@ using UnityEngine;
 namespace Louis.CustomPackages.CommandLineInterface.Core {
     [AddComponentMenu("Command Line Interface/Command Compiler")]
     [RequireComponent(typeof(ICommandRegistry))]
-    public class CommandCompiler : MonoBehaviour, ICommandCompiler {
-        ICommandRegistry _registry;
+    public class CommandCompiler : ICommandCompiler {
+        readonly ICommandRegistry _registry;
 
-        private void Awake() {
-            _registry = GetComponent<ICommandRegistry>();
+        public CommandCompiler(ICommandRegistry registry) {
+            _registry = registry;
         }
 
         public Command CreateCommand(string keyword, string[] args) {

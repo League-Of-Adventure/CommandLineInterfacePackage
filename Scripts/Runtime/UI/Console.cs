@@ -8,10 +8,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.TextCore.Text;
 using UnityEngine.UIElements;
-#if USE_VCONTAINER
 using VContainer;
-#endif
-using ILogDispatcher = Louis.CustomPackages.CommandLineInterface.Logging.ILogDispatcher;
 
 namespace Louis.CustomPackages.CommandLineInterface.UI {
     public interface IConsole {
@@ -24,20 +21,9 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
         public bool IsInputBlocked => _inputVisible || Time.frameCount == _frameClosed;
         int _frameClosed = -1;
 
-#if USE_VCONTAINER
         [Inject] readonly IOutputRegistry _outputProvider;
         [Inject] readonly ICommandRegistry _commandRegistry;
         [Inject] readonly ICommandHandler _commandHandler;
-#else
-        [Header("References")]
-        [SerializeField] CommandRegistry _commandRegistry;
-        [SerializeField] CommandHandler _commandHandler;
-        [SerializeField] CommandLogger _outputProvider;
-#endif
-
-        IOutputRegistry OutputProvider => _outputProvider;
-        ICommandHandler CommandHandler => _commandHandler;
-        ICommandRegistry CommandRegistry => _commandRegistry;
 
         [Header("UI Settings")]
         [SerializeField] VisualTreeAsset _consoleLayout;
@@ -115,19 +101,19 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
         }
 
         private void OnEnable() {
-            OutputProvider.AttachOutput(this);
-            CommandRegistry.RegisterCommand(
+            _outputProvider.AttachOutput(this);
+            _commandRegistry.RegisterCommand(
                 "echo",
                 new CommandSchema()
                     .WithDescription("Outputs some text to the console")
                     .Required<string>("output", 0, "The text you want to output to the console"),
                 Echo);
-            CommandRegistry.RegisterCommand(
+            _commandRegistry.RegisterCommand(
                 "clear",
                 new CommandSchema()
                     .WithDescription("Clears the Console"),
                 Clear);
-            CommandRegistry.RegisterCommand(
+            _commandRegistry.RegisterCommand(
                 "setConsoleMode",
                 new CommandSchema()
                     .WithDescription("Set the Console to be Visible, Hidden, or to Appear when a message is sent")
@@ -148,10 +134,10 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
         }
 
         private void OnDisable() {
-            OutputProvider?.DetachOutput(this);
-            CommandRegistry?.UnregisterCommand("echo");
-            CommandRegistry?.UnregisterCommand("clear");
-            CommandRegistry?.UnregisterCommand("setConsoleMode");
+            _outputProvider?.DetachOutput(this);
+            _commandRegistry?.UnregisterCommand("echo");
+            _commandRegistry?.UnregisterCommand("clear");
+            _commandRegistry?.UnregisterCommand("setConsoleMode");
         }
 
         private void Update() {
@@ -207,7 +193,7 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
 
                 // 2. Only process if it's not empty (prevents spamming empty enters)
                 if(!string.IsNullOrWhiteSpace(command)) {
-                    CommandHandler?.PushCommand(command);
+                    _commandHandler?.PushCommand(command);
                     _commandHistory.Add(command);
                     if (_commandHistory.Count > _maxCommandHistory) {
                         _commandHistory.RemoveAt(0); // Keep command history manageable

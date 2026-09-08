@@ -5,37 +5,23 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
-using VContainer;
 using VContainer.Unity;
-using ILogDispatcher = Louis.CustomPackages.CommandLineInterface.Logging.ILogDispatcher;
 
 namespace com.Louis.CommandLineInterface.Commands {
-#if USE_VCONTAINER
-    public class RunRepeatedCommand : IDisposable, IStartable {
-#else
-    public class RunRepeatedCommand : IDisposable
-#endif
-
-
+    public class RunRepeatedCommand : IInitializable, IDisposable {
         readonly CancellationTokenSource _cts = new();
         readonly Dictionary<string, CancellationTokenSource> _runningOperations = new();
         readonly ICommandRegistry _commandRegistry;
         readonly ICommandCompiler _commandCompiler;
         readonly ICommandHandler _commandHandler;
 
-#if USE_VCONTAINER
-        [Inject]
-#endif
         public RunRepeatedCommand(ICommandRegistry commandRegistry, ICommandCompiler commandCompiler, ICommandHandler commandHandler) {
             _commandRegistry = commandRegistry;
             _commandHandler = commandHandler;
             _commandCompiler = commandCompiler;
-#if !USE_VCONTAINER
-            Start();
-#endif
         }
 
-        public void Start() {
+        public void Initialize() {
             _commandRegistry.RegisterCommand("runRepeated",
                 new CommandSchema()
                     .WithDescription("Runs a given command repeatedly at regular intervals")

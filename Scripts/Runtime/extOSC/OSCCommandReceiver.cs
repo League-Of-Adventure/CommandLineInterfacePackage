@@ -1,9 +1,7 @@
 using Louis.CustomPackages.CommandLineInterface.Core;
 using UnityEngine;
 
-#if USE_VCONTAINER
 using VContainer;
-#endif
 
 #if USE_EXTOSC
 using extOSC;
@@ -15,13 +13,7 @@ namespace Louis.CustomPackages.CommandLineInterface.OSC {
         [Header("Settings")]
         [SerializeField] string _address = "/command";
         [SerializeField] int _localPort = 7001;
-#if USE_VCONTAINER
         [Inject] readonly ICommandHandler _commandHandler;
-#else
-        [SerializeField] CommandManager _commandHandler;
-#endif
-
-        ICommandHandler CommandHandler => _commandHandler;
 
         OSCReceiver _receiver;
         OSCBind _binding;
@@ -49,7 +41,7 @@ namespace Louis.CustomPackages.CommandLineInterface.OSC {
             for(int i = 0; i < argCount; i++) {
                 parameters[i] = message.Values[i + 1].StringValue;
             }
-            CommandHandler?.PushCommand(cmdName, parameters);
+            _commandHandler?.PushCommand(cmdName, parameters);
         }
     }
 #endif
