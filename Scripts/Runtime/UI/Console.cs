@@ -77,9 +77,9 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
         private void Awake() {
             // 1. Configure the UI Document at runtime
             UIDocument uiDoc = gameObject.AddComponent<UIDocument>();
+            uiDoc.sortingOrder = sortOrder;
             uiDoc.panelSettings = _panelSettings;
             uiDoc.visualTreeAsset = _consoleLayout;
-            uiDoc.sortingOrder = sortOrder;
 
             // 2. Query elements
             var root = uiDoc.rootVisualElement;

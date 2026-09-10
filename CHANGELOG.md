@@ -54,3 +54,6 @@
 
 ## [1.9.0] - 08/09/2026
 - Removed conditional dependency on VContainer, now a required dependency
+
+## [1.9.1] - 10/09/2026
+- Fixed an issue causing UI panels to render in wrong order
