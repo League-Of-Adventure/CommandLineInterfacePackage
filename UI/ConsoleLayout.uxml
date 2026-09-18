@@ -2,7 +2,6 @@
     <Style src="project://database/Assets/CustomPackages/CommandLineInterfacePackage/UI/ConsoleStyle.uss?fileID=7433441132597879392&amp;guid=d8efbffd1876e234999c4b19e9bb3fc9&amp;type=3#ConsoleStyle" />
     <ui:VisualElement name="console-container" class="root-container">
         <ui:ScrollView name="output-box" class="fade-element output-box" />
-        
         <ui:TextField name="input-field" placeholder-text="Enter command..." class="fade-element console-input" />
     </ui:VisualElement>
 </ui:UXML>

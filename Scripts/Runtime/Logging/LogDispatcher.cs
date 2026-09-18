@@ -50,6 +50,7 @@ namespace Louis.CustomPackages.CommandLineInterface.Logging {
 
     [Serializable]
     public struct Log {
+        public DateTime timestamp;
         public LogLevel level;
         public string sender;
         public string message;
@@ -58,20 +59,22 @@ namespace Louis.CustomPackages.CommandLineInterface.Logging {
             this.level = level;
             this.message = message;
             sender = senderName;
+            timestamp = DateTime.UtcNow;
         }
 
         public Log(LogLevel level, string message) {
             this.level = level;
             this.message = message;
             sender = "";
+            timestamp = DateTime.UtcNow;
         }
 
         public readonly string Raw {
             get {
                 if(string.IsNullOrWhiteSpace(sender)) {
-                    return $"[{level}]: {message}";
+                    return $"{timestamp:HH:mm:ss} -  [{level}]: {message}";
                 } else {
-                    return $"[{level}] - [{sender}]: {message}";
+                    return $"{timestamp:HH:mm:ss} - [{level}] - [{sender}]: {message}";
                 }
             }
         } 
@@ -79,15 +82,17 @@ namespace Louis.CustomPackages.CommandLineInterface.Logging {
         public readonly string Formatted {
             get {
                 string color = level switch {
+                    LogLevel.Debug => "pink",
                     LogLevel.Info => "white",
+                    LogLevel.Analytics => "blue",
                     LogLevel.Success => "green",
                     LogLevel.Warning => "yellow",
                     LogLevel.Error => "red",
                     _ => "white"
                 };
-                string prefix = $"[{level}]".PadRight(10, ' ');
-                string sender = string.IsNullOrWhiteSpace(this.sender) ? "" : $"[{this.sender}]: ".PadRight(25, ' ');
-                return $"<b><color={color}>{prefix}</color> - {sender}</b>{message}";
+                string prefix = $"{timestamp:HH:mm:ss} - [{level}]".PadRight(20, ' ');
+                string sender = string.IsNullOrWhiteSpace(this.sender) ? "" : $"[{this.sender}]: ";
+                return $"<b><color={color}>{prefix} - {sender}</color></b>\n<indent=100px>{message}</indent>";
             }
         }
     }

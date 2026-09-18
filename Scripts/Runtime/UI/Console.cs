@@ -217,7 +217,7 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
             _outputScroll.EnableInClassList("hidden", !visible);
         }
 
-        void SetInputVisibility(bool visible) {
+        async void SetInputVisibility(bool visible) {
             if (_inputVisible && !visible) {
                 _frameClosed = Time.frameCount;
             }
@@ -227,7 +227,9 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
             _commandHistoryIndex = -1;
             if(visible) {
                 _inputField.Focus();
-                _inputField.schedule.Execute(() => _inputField.value = string.Empty).ExecuteLater(1);
+                await UniTask.Yield();
+                await UniTask.Yield();
+                _inputField.value = string.Empty;
             } else {
                 _inputField.Blur();
             }
@@ -256,6 +258,8 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
             }
 
             // 4. Scroll to the bottom to show the new message (scheduled to allow for layout update)
+            await UniTask.Yield();
+            await UniTask.Yield();
             await UniTask.Yield();
             var scroller = _outputScroll.verticalScroller;
             _outputScroll.scrollOffset = new Vector2(0, scroller.highValue);
