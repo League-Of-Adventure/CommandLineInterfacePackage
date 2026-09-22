@@ -63,3 +63,6 @@
 - Fixed a Console bug causing output logs not to scroll to the bottom
 - Added timestamps to logs
 - improved console formatting
+
+## [1.9.3] - 22/09/2026
+- Fixed <color=pink> tag on console in favour of <color=magenta>

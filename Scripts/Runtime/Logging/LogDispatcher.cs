@@ -82,11 +82,11 @@ namespace Louis.CustomPackages.CommandLineInterface.Logging {
         public readonly string Formatted {
             get {
                 string color = level switch {
-                    LogLevel.Debug => "pink",
+                    LogLevel.Debug => "magenta",
                     LogLevel.Info => "white",
                     LogLevel.Analytics => "blue",
                     LogLevel.Success => "green",
-                    LogLevel.Warning => "yellow",
+                    LogLevel.Warning => "orange",
                     LogLevel.Error => "red",
                     _ => "white"
                 };
