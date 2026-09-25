@@ -66,3 +66,6 @@
 
 ## [1.9.3] - 22/09/2026
 - Fixed <color=pink> tag on console in favour of <color=magenta>
+
+## [1.9.4] - 25/09/2026
+- Fixed console text scaling on smaller res screens
