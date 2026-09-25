@@ -69,3 +69,6 @@
 
 ## [1.9.4] - 25/09/2026
 - Fixed console text scaling on smaller res screens
+
+## [1.9.5] - 25/09/2026
+- Removed Prefabs causing uneccesary errors to appear on first import
