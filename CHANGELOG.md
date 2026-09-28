@@ -72,3 +72,6 @@
 
 ## [1.9.5] - 25/09/2026
 - Removed Prefabs causing uneccesary errors to appear on first import
+
+## [1.9.6] - 28/09/2026
+- Fixed a bug causing the console to still handle input events even when the input field wasn't selected

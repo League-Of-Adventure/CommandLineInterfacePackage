@@ -160,6 +160,7 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
         }
 
         void OnKeyDown(KeyDownEvent evt) {
+            if(!_inputVisible) return;
             // Scrolling with Keyboard
             if(evt.keyCode == KeyCode.PageUp) {
                 _outputScroll.scrollOffset -= new Vector2(0, 50);
