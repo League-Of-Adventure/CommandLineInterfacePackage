@@ -73,8 +73,9 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
         float _hideTimer;
         bool _outputVisible;
         bool _inputVisible;
+        bool _isInitialized;
 
-        private void Awake() {
+        void InitializeUIToolkitElements() {
             // 1. Configure the UI Document at runtime
             UIDocument uiDoc = gameObject.AddComponent<UIDocument>();
             uiDoc.sortingOrder = sortOrder;
@@ -93,11 +94,16 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
 
             // 4. Setup Events
             _inputField.RegisterCallback<KeyDownEvent>(OnKeyDown, TrickleDown.TrickleDown);
+            // Register this during initialization
+            _inputField.RegisterCallback<TransitionEndEvent>(evt => {
+                if(_inputVisible) _inputField.Focus();
+            });
 
             // 5. Setup Initial State: Hidden
             CurrentFont = _consoleFont;
             SetInputVisibility(false);
             SetOutputVisibility(false);
+            _isInitialized = true;
         }
 
         private void OnEnable() {
@@ -131,6 +137,8 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
                         ("c", "alwaysClosed"),
                         ("m", "openOnMessage")),
                 SetConsoleMode);
+
+            InitializeUIToolkitElements();
         }
 
         private void OnDisable() {
@@ -138,6 +146,7 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
             _commandRegistry?.UnregisterCommand("echo");
             _commandRegistry?.UnregisterCommand("clear");
             _commandRegistry?.UnregisterCommand("setConsoleMode");
+            _isInitialized = false;
         }
 
         private void Update() {
@@ -161,6 +170,7 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
 
         void OnKeyDown(KeyDownEvent evt) {
             if(!_inputVisible) return;
+            if(!_isInitialized) return;
             // Scrolling with Keyboard
             if(evt.keyCode == KeyCode.PageUp) {
                 _outputScroll.scrollOffset -= new Vector2(0, 50);
@@ -209,6 +219,7 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
         }
 
         void SetOutputVisibility(bool visible) {
+            if(!_isInitialized) return;
             // Check current mode for visibility override rules
             if(Mode == ConsoleMode.AlwaysOpen) visible = true;
             else if(Mode == ConsoleMode.AlwaysClosed) visible = false;
@@ -216,15 +227,14 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
             if(visible) _hideTimer = _timeBeforeHideOutput;
             _outputVisible = visible;
             _outputScroll.EnableInClassList("hidden", !visible);
-            _outputScroll.pickingMode = visible ? PickingMode.Position : PickingMode.Ignore;
         }
 
         async void SetInputVisibility(bool visible) {
+            if(!_isInitialized) return;
             if (_inputVisible && !visible) {
                 _frameClosed = Time.frameCount;
             }
             _inputField.EnableInClassList("hidden", !visible);
-            _inputField.pickingMode = visible ? PickingMode.Position : PickingMode.Ignore;
             _inputVisible = visible;
 
             _commandHistoryIndex = -1;
@@ -240,11 +250,13 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
         }
 
         public void Write(Log log) {
+            if(!_isInitialized) return;
             string output = log.Formatted;
             Write(output);
         }
 
         async void Write(string output) {
+            if(!_isInitialized) return;
             // 0. Set the Output log to visible if it isn't already
             SetOutputVisibility(true);
 
@@ -270,17 +282,20 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
 
         #region Command Line Functions
         UniTask Echo(BoundArgs args, CancellationToken token) {
+            if(!_isInitialized) return UniTask.CompletedTask;
             Write($"> {args.Get<string>("output")}");
             return UniTask.CompletedTask;
         }
 
         UniTask Clear(BoundArgs args, CancellationToken token) {
+            if(!_isInitialized) return UniTask.CompletedTask;
             SetOutputVisibility(true);
             _outputScroll.Clear();
             return UniTask.CompletedTask;
         }
 
         UniTask SetConsoleMode(BoundArgs args, CancellationToken token) {
+            if(!_isInitialized) return UniTask.CompletedTask;
             var mode = args.Get<ConsoleMode>("mode");
             Mode = mode;
             LogDispatch.Log(this, $"Set Console Mode to {Mode}");

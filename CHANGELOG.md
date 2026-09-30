@@ -78,3 +78,6 @@
 
 ## [1.9.7] - 30/09/2026
 - Set picking mode to ignore when console panel is closed to avoid blocking other raycasts
+
+## [1.9.8] - 30/09/2026
+- Actually fixed console blocking raycasts
