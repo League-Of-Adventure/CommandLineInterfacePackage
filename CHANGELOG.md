@@ -75,3 +75,6 @@
 
 ## [1.9.6] - 28/09/2026
 - Fixed a bug causing the console to still handle input events even when the input field wasn't selected
+
+## [1.9.7] - 30/09/2026
+- Set picking mode to ignore when console panel is closed to avoid blocking other raycasts

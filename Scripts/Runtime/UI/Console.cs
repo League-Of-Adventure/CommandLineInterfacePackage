@@ -216,6 +216,7 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
             if(visible) _hideTimer = _timeBeforeHideOutput;
             _outputVisible = visible;
             _outputScroll.EnableInClassList("hidden", !visible);
+            _outputScroll.pickingMode = visible ? PickingMode.Position : PickingMode.Ignore;
         }
 
         async void SetInputVisibility(bool visible) {
@@ -223,6 +224,7 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
                 _frameClosed = Time.frameCount;
             }
             _inputField.EnableInClassList("hidden", !visible);
+            _inputField.pickingMode = visible ? PickingMode.Position : PickingMode.Ignore;
             _inputVisible = visible;
 
             _commandHistoryIndex = -1;
