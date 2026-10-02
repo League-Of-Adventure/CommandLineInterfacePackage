@@ -13,9 +13,11 @@
 .fade-element {
     opacity: 1;
     visibility: visible;
-    transition-property: opacity, visibility;
-    transition-duration: 0.3s, 0s;
-    transition-delay: 0s, 0s; /* Immediate visibility when opening */
+    /* ONLY transition opacity when opening so visibility snaps to 'visible' instantly on Frame 0 */
+    transition-property: opacity;
+    transition-duration: 0.15s;
+    transition-delay: 0s;
+    
     background-color: rgba(0, 0, 0, 0.8);
     border-radius: 5px;
     margin-top: 5px;
@@ -24,9 +26,10 @@
 .hidden {
     opacity: 0;
     visibility: hidden;
+    /* Transition BOTH when closing so visibility stays 'visible' during the 0.15s fade-out delay */
     transition-property: opacity, visibility;
-    transition-duration: 0.3s, 0s;
-    transition-delay: 0s, 0.3s; /* Immediate visibility when opening */
+    transition-duration: 0.15s, 0s;
+    transition-delay: 0s, 0.15s;
 }
 
 .output-box {

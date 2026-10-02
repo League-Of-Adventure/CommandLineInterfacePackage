@@ -94,10 +94,6 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
 
             // 4. Setup Events
             _inputField.RegisterCallback<KeyDownEvent>(OnKeyDown, TrickleDown.TrickleDown);
-            // Register this during initialization
-            _inputField.RegisterCallback<TransitionEndEvent>(evt => {
-                if(_inputVisible) _inputField.Focus();
-            });
 
             // 5. Setup Initial State: Hidden
             CurrentFont = _consoleFont;
@@ -169,8 +165,14 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
         }
 
         void OnKeyDown(KeyDownEvent evt) {
-            if(!_inputVisible) return;
-            if(!_isInitialized) return;
+            // Prevent the backtick/tilde key from printing "`" into the field when toggling
+            if(evt.keyCode == KeyCode.BackQuote) {
+                evt.StopImmediatePropagation();
+                return;
+            }
+
+            if(!_inputVisible || !_isInitialized) return;
+
             // Scrolling with Keyboard
             if(evt.keyCode == KeyCode.PageUp) {
                 _outputScroll.scrollOffset -= new Vector2(0, 50);
@@ -183,35 +185,33 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
                 return;
             }
 
-            // Scrolling through previous commands using up and down arrow keys
-            if (evt.keyCode == KeyCode.UpArrow) {
+            // Command History Navigation
+            if(evt.keyCode == KeyCode.UpArrow) {
                 _commandHistoryIndex--;
                 if(_commandHistoryIndex == -2) {
                     _commandHistoryIndex = _commandHistory.Count - 1;
                 }
                 _inputField.value = _commandHistoryIndex == -1 ? string.Empty : _commandHistory[_commandHistoryIndex];
-            } else if (evt.keyCode == KeyCode.DownArrow) {
+            } else if(evt.keyCode == KeyCode.DownArrow) {
                 _commandHistoryIndex++;
-                if (_commandHistoryIndex >= _commandHistory.Count) {
+                if(_commandHistoryIndex >= _commandHistory.Count) {
                     _commandHistoryIndex = -1;
                 }
                 _inputField.value = _commandHistoryIndex == -1 ? string.Empty : _commandHistory[_commandHistoryIndex];
             }
 
+            // Submit Command
             if(evt.keyCode == KeyCode.Return || evt.keyCode == KeyCode.KeypadEnter) {
-                // 1. Get the value
                 string command = _inputField.value;
 
-                // 2. Only process if it's not empty (prevents spamming empty enters)
                 if(!string.IsNullOrWhiteSpace(command)) {
                     _commandHandler?.PushCommand(command);
                     _commandHistory.Add(command);
-                    if (_commandHistory.Count > _maxCommandHistory) {
-                        _commandHistory.RemoveAt(0); // Keep command history manageable
+                    if(_commandHistory.Count > _maxCommandHistory) {
+                        _commandHistory.RemoveAt(0);
                     }
                 }
 
-                // 3. Hide Command Line and stop event propagation
                 SetInputVisibility(false);
                 evt.StopImmediatePropagation();
                 _inputField.value = "";
@@ -239,8 +239,8 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
 
             _commandHistoryIndex = -1;
             if(visible) {
-                _inputField.Focus();
                 await UniTask.Yield();
+                _inputField.Focus();
                 await UniTask.Yield();
                 _inputField.value = string.Empty;
             } else {

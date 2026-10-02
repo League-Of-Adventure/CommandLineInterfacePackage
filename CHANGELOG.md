@@ -82,4 +82,5 @@
 ## [1.9.8] - 30/09/2026
 - Actually fixed console blocking raycasts
 
-## [1.9.9] - 02/10/2026
+## [1.9.10] - 02/10/2026
+- Fixed console bug causing it to drop the first character input
