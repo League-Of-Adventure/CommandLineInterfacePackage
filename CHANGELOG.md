@@ -81,3 +81,5 @@
 
 ## [1.9.8] - 30/09/2026
 - Actually fixed console blocking raycasts
+
+## [1.9.9] - 02/10/2026
