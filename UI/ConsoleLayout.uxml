@@ -2,6 +2,10 @@
     <Style src="project://database/Assets/CustomPackages/CommandLineInterfacePackage/UI/ConsoleStyle.uss?fileID=7433441132597879392&amp;guid=d8efbffd1876e234999c4b19e9bb3fc9&amp;type=3#ConsoleStyle"/>
     <ui:VisualElement name="console-container" picking-mode="Ignore" class="root-container">
         <ui:ScrollView name="output-box" class="fade-element output-box hidden"/>
-        <ui:TextField name="input-field" placeholder-text="Enter command..." class="fade-element console-input hidden"/>
+        <ui:VisualElement name="input-row" class="fade-element console-input-row hidden">
+            <ui:Button name="filter-button" text="Levels" class="console-filter-button" tooltip="Choose which log levels are visible"/>
+            <ui:TextField name="input-field" placeholder-text="Enter command..." class="console-input"/>
+            <ui:VisualElement name="filter-menu" class="console-filter-menu filter-menu-closed"/>
+        </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

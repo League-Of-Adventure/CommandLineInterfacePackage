@@ -99,11 +99,13 @@ namespace Louis.CustomPackages.CommandLineInterface.Logging {
 
     [Flags]
     public enum LogLevel {
-        Debug       = 0,
-        Info        = 1,
-        Analytics   = 2,
-        Success     = 4,
-        Warning     = 8,
-        Error       = 16
+        None        = 0,
+        Debug       = 1,
+        Info        = 2,
+        Analytics   = 4,
+        Success     = 8,
+        Warning     = 16,
+        Error       = 32,
+        All         = Debug | Info | Analytics | Success | Warning | Error
     }
 }

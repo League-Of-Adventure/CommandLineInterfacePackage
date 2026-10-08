@@ -62,11 +62,99 @@
 }
 
 .console-input {
+    flex-grow: 1;
+    min-width: 0;
     flex-shrink: 0;
-    margin-top: 5px;
+    margin-top: 0;
     margin-bottom: 0;
     background-color: rgba(0, 0, 0, 0.8);
     -unity-font-style: bold;
+}
+
+.console-input-row {
+    flex-direction: row;
+    flex-shrink: 0;
+    align-items: stretch;
+}
+
+.console-filter-button {
+    margin: 0 5px 0 0;
+    padding: 4px 8px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: rgb(255, 255, 255);
+    border-color: rgb(51, 51, 51);
+    border-width: 1px;
+    border-radius: 4px;
+    -unity-font-style: bold;
+    flex-shrink: 0;
+}
+
+.console-filter-button:hover, .console-filter-button:focus {
+    background-color: rgb(40, 40, 40);
+    border-color: rgb(102, 102, 102);
+}
+
+.console-filter-menu {
+    position: absolute;
+    left: 0;
+    bottom: 100%;
+    margin-bottom: 5px;
+    padding: 5px;
+    min-width: 180px;
+    background-color: rgb(12, 12, 12);
+    border-color: rgb(51, 51, 51);
+    border-width: 1px;
+    border-radius: 5px;
+    color: rgb(255, 255, 255);
+}
+
+.filter-menu-closed {
+    display: none;
+}
+
+.filter-toggle {
+    margin: 0;
+    padding: 4px 8px;
+    align-items: center;
+}
+
+.filter-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.filter-toggle > .unity-toggle__label {
+    min-width: 0;
+    flex-grow: 1;
+    flex-shrink: 0;
+    margin-right: 12px;
+    color: rgb(255, 255, 255);
+}
+
+.filter-toggle .unity-toggle__input {
+    flex-grow: 0;
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    min-height: 22px;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(30, 30, 30);
+    border-color: rgb(85, 85, 85);
+    border-width: 1px;
+    border-radius: 3px;
+}
+
+.filter-toggle .unity-toggle__checkmark {
+    flex-grow: 0;
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    min-height: 18px;
+    margin: 0;
 }
 
 .console-input .unity-base-text-field__placeholder--empty {

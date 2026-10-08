@@ -84,3 +84,6 @@
 
 ## [1.9.10] - 02/10/2026
 - Fixed console bug causing it to drop the first character input
+
+## [1.9.11] - 08/10/2026
+- Added a log filter to the console

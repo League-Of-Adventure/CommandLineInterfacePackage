@@ -43,6 +43,12 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
         VisualElement _rootContainer;
         ScrollView _outputScroll;
         TextField _inputField;
+        VisualElement _inputRow;
+        VisualElement _filterMenu;
+        Button _filterButton;
+        readonly List<(LogLevel level, string output)> _logHistory = new();
+        LogLevel _enabledLogLevels = LogLevel.All;
+        readonly Dictionary<LogLevel, Toggle> _levelToggles = new();
 
         ConsoleMode _mode;
         ConsoleMode Mode {
@@ -87,6 +93,31 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
             _rootContainer = root.Q<VisualElement>("console-container");
             _outputScroll = root.Q<ScrollView>("output-box");
             _inputField = root.Q<TextField>("input-field");
+            _inputRow = root.Q<VisualElement>("input-row");
+            _filterButton = root.Q<Button>("filter-button");
+            _filterMenu = root.Q<VisualElement>("filter-menu");
+            _levelToggles.Clear();
+            foreach(LogLevel level in Enum.GetValues(typeof(LogLevel))) {
+                if(level == LogLevel.None || level == LogLevel.All) continue;
+                var toggle = new Toggle(level.ToString());
+                toggle.AddToClassList("filter-toggle");
+                toggle.SetValueWithoutNotify(IsLogLevelEnabled(level));
+                toggle.RegisterValueChangedCallback(evt => {
+                    if(evt.newValue) _enabledLogLevels |= level;
+                    else _enabledLogLevels &= ~level;
+                    RefreshFilter();
+                });
+                _levelToggles.Add(level, toggle);
+                _filterMenu.Add(toggle);
+            }
+            _filterButton.clicked += () => _filterMenu.ToggleInClassList("filter-menu-closed");
+            root.RegisterCallback<PointerDownEvent>(evt => {
+                var target = evt.target as VisualElement;
+                if(target != null && !_filterMenu.Contains(target) && !_filterButton.Contains(target)
+                    && target != _filterMenu && target != _filterButton) {
+                    _filterMenu.AddToClassList("filter-menu-closed");
+                }
+            }, TrickleDown.TrickleDown);
 
             // 3. Setup Scrolling on the output box
             _outputScroll.pickingMode = PickingMode.Position;
@@ -97,9 +128,10 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
 
             // 5. Setup Initial State: Hidden
             CurrentFont = _consoleFont;
+            _isInitialized = true;
             SetInputVisibility(false);
             SetOutputVisibility(false);
-            _isInitialized = true;
+            RefreshFilter();
         }
 
         private void OnEnable() {
@@ -133,6 +165,12 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
                         ("c", "alwaysClosed"),
                         ("m", "openOnMessage")),
                 SetConsoleMode);
+            _commandRegistry.RegisterCommand(
+                "setConsoleFilter",
+                new CommandSchema()
+                    .WithDescription("Show only the selected log levels without clearing log history")
+                    .Required<LogLevel>("levels", 0, "Comma-separated log levels, all, or none (e.g. Warning,Error)"),
+                SetConsoleFilter);
 
             InitializeUIToolkitElements();
         }
@@ -142,6 +180,7 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
             _commandRegistry?.UnregisterCommand("echo");
             _commandRegistry?.UnregisterCommand("clear");
             _commandRegistry?.UnregisterCommand("setConsoleMode");
+            _commandRegistry?.UnregisterCommand("setConsoleFilter");
             _isInitialized = false;
         }
 
@@ -234,7 +273,8 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
             if (_inputVisible && !visible) {
                 _frameClosed = Time.frameCount;
             }
-            _inputField.EnableInClassList("hidden", !visible);
+            _inputRow.EnableInClassList("hidden", !visible);
+            if(!visible) _filterMenu.AddToClassList("filter-menu-closed");
             _inputVisible = visible;
 
             _commandHistoryIndex = -1;
@@ -250,32 +290,51 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
         }
 
         public void Write(Log log) {
-            if(!_isInitialized) return;
-            string output = log.Formatted;
-            Write(output);
+            Write(log.Formatted, log.level);
         }
 
-        async void Write(string output) {
-            if(!_isInitialized) return;
-            // 0. Set the Output log to visible if it isn't already
-            SetOutputVisibility(true);
-
-            // 1. Create the element
-            Label newEntry = new ($"{output}");
-            newEntry.AddToClassList("log-entry");
-
-            // 2. Add to the scroll view
-            _outputScroll.Add(newEntry);
-
-            // 3. Keep log size under control
-            if(_outputScroll.childCount > _maxLogEntries) {
-                _outputScroll.RemoveAt(0); // Remove the oldest entry
+        void Write(string output, LogLevel level = LogLevel.Info) {
+            _logHistory.Add((level, output));
+            while(_logHistory.Count > Math.Max(0, _maxLogEntries)) {
+                _logHistory.RemoveAt(0);
             }
+            if(!_isInitialized) return;
+            RebuildOutput();
+            if(IsLogLevelEnabled(level)) {
+                SetOutputVisibility(true);
+                ScrollToBottom();
+            }
+        }
 
-            // 4. Scroll to the bottom to show the new message (scheduled to allow for layout update)
+        void RebuildOutput() {
+            _outputScroll.Clear();
+            foreach(var entry in _logHistory) {
+                if(!IsLogLevelEnabled(entry.level)) continue;
+                var label = new Label(entry.output);
+                label.AddToClassList("log-entry");
+                _outputScroll.Add(label);
+            }
+        }
+
+        bool IsLogLevelEnabled(LogLevel level) => (_enabledLogLevels & level) != LogLevel.None;
+
+        void RefreshFilter() {
+            int enabledCount = 0;
+            foreach(var pair in _levelToggles) {
+                bool enabled = IsLogLevelEnabled(pair.Key);
+                pair.Value.SetValueWithoutNotify(enabled);
+                if(enabled) enabledCount++;
+            }
+            _filterButton.text = $"Levels ({enabledCount}/{_levelToggles.Count})";
+            RebuildOutput();
+            ScrollToBottom();
+        }
+
+        async void ScrollToBottom() {
             await UniTask.Yield();
             await UniTask.Yield();
             await UniTask.Yield();
+            if(!_isInitialized) return;
             var scroller = _outputScroll.verticalScroller;
             _outputScroll.scrollOffset = new Vector2(0, scroller.highValue);
         }
@@ -290,7 +349,21 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
         UniTask Clear(BoundArgs args, CancellationToken token) {
             if(!_isInitialized) return UniTask.CompletedTask;
             SetOutputVisibility(true);
+            _logHistory.Clear();
             _outputScroll.Clear();
+            return UniTask.CompletedTask;
+        }
+
+        UniTask SetConsoleFilter(BoundArgs args, CancellationToken token) {
+            var levels = args.Get<LogLevel>("levels");
+            if((levels & ~LogLevel.All) != LogLevel.None) {
+                throw new CommandArgumentException($"Unknown log levels '{levels}'. Use {string.Join(", ", Enum.GetNames(typeof(LogLevel)))}.");
+            }
+            _enabledLogLevels = levels;
+            if(_isInitialized) {
+                RefreshFilter();
+                SetOutputVisibility(true);
+            }
             return UniTask.CompletedTask;
         }
 
