@@ -87,3 +87,6 @@
 
 ## [1.9.11] - 08/10/2026
 - Added a log filter to the console
+
+## [1.9.12] - 12/10/2026
+- Removed scripts Lifetime Scope
