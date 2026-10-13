@@ -98,12 +98,14 @@ namespace Louis.CustomPackages.CommandLineInterface.Core {
         public void PushCommand(string raw) {
             try {
                 Command command = _compiler.CreateCommand(raw);
-                string keyword = command.CommandName;
-                CommandSchema schema = _registry.Schemas[keyword];
-                if(schema.ExecuteImmediately) {
 
+                if(!command.IsCompiled) {
+                    throw new CommandException(
+                        $"Could not compile command '{command.CommandName}'.");
                 }
-                _commandQueue.Enqueue(command);
+
+                // Reuse the existing overload that respects ExecuteImmediately.
+                PushCommand(command);
             } catch(Exception e) {
                 LogDispatch.Log("CommandManager", e.Message, LogLevel.Error);
             }
