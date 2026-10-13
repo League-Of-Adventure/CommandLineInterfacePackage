@@ -3,11 +3,11 @@ using UnityEngine;
 
 namespace Louis.CustomPackages.CommandLineInterface.Core {
     [AddComponentMenu("Command Line Interface/Command Compiler")]
-    [RequireComponent(typeof(ICommandRegistry))]
+    [RequireComponent(typeof(ICommandEntryRegistry))]
     public class CommandCompiler : ICommandCompiler {
-        readonly ICommandRegistry _registry;
+        readonly ICommandEntryRegistry _registry;
 
-        public CommandCompiler(ICommandRegistry registry) {
+        public CommandCompiler(ICommandEntryRegistry registry) {
             _registry = registry;
         }
 

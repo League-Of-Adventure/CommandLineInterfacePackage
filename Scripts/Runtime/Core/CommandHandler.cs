@@ -19,10 +19,10 @@ namespace Louis.CustomPackages.CommandLineInterface.Core {
     public class CommandHandler : ICommandHandler, IInitializable, IDisposable {
         CancellationTokenSource _cts = new();
         readonly Queue<Command> _commandQueue = new();
-        readonly ICommandRegistry _registry;
+        readonly ICommandEntryRegistry _registry;
         readonly ICommandCompiler _compiler;
 
-        public CommandHandler(ILogDispatcher logger, ICommandRegistry registry, ICommandCompiler compiler) {
+        public CommandHandler(ILogDispatcher logger, ICommandEntryRegistry registry, ICommandCompiler compiler) {
             _registry = registry;
             _compiler = compiler;
         }

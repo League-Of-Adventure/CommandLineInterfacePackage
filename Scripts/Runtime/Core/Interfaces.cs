@@ -17,6 +17,19 @@ namespace Louis.CustomPackages.CommandLineInterface.Core {
         public IReadOnlyDictionary<string, Func<BoundArgs, CancellationToken, UniTask>> Callbacks { get; }
     }
 
+    public interface ICommandEntryRegistry : ICommandRegistry {
+        void RegisterCommand(ICommandEntry entry);
+        void UnregisterCommand(ICommandEntry entry);
+
+        bool TryGetEntry(string keyword, out ICommandEntry entry);
+    }
+
+    public interface ICommandEntry {
+        string Command { get; }
+        CommandSchema Schema { get; }
+        UniTask ExecuteAsync(BoundArgs args, CancellationToken token);
+    }
+
     public interface ICommandHandler {
         void PushCommand(Command command);
         void PushCommand(string command);

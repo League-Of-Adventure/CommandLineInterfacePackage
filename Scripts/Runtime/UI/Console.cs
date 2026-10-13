@@ -22,7 +22,7 @@ namespace Louis.CustomPackages.CommandLineInterface.UI {
         int _frameClosed = -1;
 
         [Inject] readonly IOutputRegistry _outputProvider;
-        [Inject] readonly ICommandRegistry _commandRegistry;
+        [Inject] readonly ICommandEntryRegistry _commandRegistry;
         [Inject] readonly ICommandHandler _commandHandler;
 
         [Header("UI Settings")]

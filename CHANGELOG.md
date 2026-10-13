@@ -90,3 +90,6 @@
 
 ## [1.9.12] - 12/10/2026
 - Removed scripts Lifetime Scope
+
+## [1.9.13] - 13/10/2026
+- Extended the implementation of the command registry to allow registration of preconstructed ICommandEntry objects

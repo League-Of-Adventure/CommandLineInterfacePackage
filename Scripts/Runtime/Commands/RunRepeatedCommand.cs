@@ -11,11 +11,11 @@ namespace com.Louis.CommandLineInterface.Commands {
     public class RunRepeatedCommand : IInitializable, IDisposable {
         readonly CancellationTokenSource _cts = new();
         readonly Dictionary<string, CancellationTokenSource> _runningOperations = new();
-        readonly ICommandRegistry _commandRegistry;
+        readonly ICommandEntryRegistry _commandRegistry;
         readonly ICommandCompiler _commandCompiler;
         readonly ICommandHandler _commandHandler;
 
-        public RunRepeatedCommand(ICommandRegistry commandRegistry, ICommandCompiler commandCompiler, ICommandHandler commandHandler) {
+        public RunRepeatedCommand(ICommandEntryRegistry commandRegistry, ICommandCompiler commandCompiler, ICommandHandler commandHandler) {
             _commandRegistry = commandRegistry;
             _commandHandler = commandHandler;
             _commandCompiler = commandCompiler;
