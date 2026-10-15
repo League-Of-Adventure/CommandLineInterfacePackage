@@ -93,3 +93,8 @@
 
 ## [1.9.13] - 13/10/2026
 - Extended the implementation of the command registry to allow registration of preconstructed ICommandEntry objects
+
+## [1.9.15] - 15/10/2026
+- Fixed negative positional numbers being interpreted as flags, causing optional arguments to fall back to their defaults.
+- Supports negative integers, decimals and scientific notation while preserving named arguments and nonnumeric flags/shorthands. Negative numeric tokens are now reserved for values rather than numeric flag names.
+- Added regression tests for negative coordinates, quoted and named values, and mixed flags under different cultures.

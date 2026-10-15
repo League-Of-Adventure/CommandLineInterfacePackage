@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace Louis.CustomPackages.CommandLineInterface.Core {
     internal readonly struct ParsedTokens {
@@ -13,7 +14,10 @@ namespace Louis.CustomPackages.CommandLineInterface.Core {
             Positional = new();
 
             foreach (var token in tokens) {
-                if(token.StartsWith("--") && token.Length > 2)
+                // A leading minus belongs to a numeric value, not a flag name.
+                if(token.StartsWith("-") && double.TryParse(token, NumberStyles.Float, CultureInfo.InvariantCulture, out _))
+                    Positional.Add(token);
+                else if(token.StartsWith("--") && token.Length > 2)
                     Flags.Add(token[2..]);
                 else if(token.StartsWith("-") && token.Length > 1) { 
                     var key = token[1..];

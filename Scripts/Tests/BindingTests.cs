@@ -117,6 +117,42 @@ public class BindingTests {
         Assert.AreEqual("Hello, World!", boundArgs2.Get<string>("message"));
     }
 
+    [TestCase("-1 -1", -1f, -1f)]
+    [TestCase("-0.5 -2.25", -0.5f, -2.25f)]
+    [TestCase("-.5 -1e3", -0.5f, -1000f)]
+    [TestCase("-1e-3 2", -0.001f, 2f)]
+    [TestCase("x=-1 y=-1", -1f, -1f)]
+    [TestCase("\"-1\" \"-1\"", -1f, -1f)]
+    [SetCulture("en-US")]
+    public void NegativeCoordinatesBindWithoutUsingOptionalDefaults(string arguments, float x, float y) {
+        var schema = new CommandSchema()
+            .Optional<float>("x", 0, 0f)
+            .Optional<float>("y", 1, 0f);
+        var tokens = CommandTokenizer.Tokenize(arguments);
+        var parsed = new ParsedTokens(tokens, schema.Shorthands);
+        var bound = CommandBinder.Bind(schema, parsed);
+
+        Assert.AreEqual(x, bound.Get<float>("x"));
+        Assert.AreEqual(y, bound.Get<float>("y"));
+        Assert.IsEmpty(parsed.Flags);
+    }
+
+    [TestCase("en-US")]
+    [TestCase("fr-FR")]
+    public void NegativeNumbersRemainPositionalAlongsideFlags(string culture) {
+        var previousCulture = System.Globalization.CultureInfo.CurrentCulture;
+        try {
+            System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo(culture);
+            var aliases = new System.Collections.Generic.Dictionary<string, string> { { "d", "default" } };
+            var parsed = new ParsedTokens(CommandTokenizer.Tokenize("-0.5 -1e3 -d --verbose -custom x=-2"), aliases);
+            CollectionAssert.AreEqual(new[] { "-0.5", "-1e3" }, parsed.Positional);
+            CollectionAssert.AreEquivalent(new[] { "default", "verbose", "custom" }, parsed.Flags);
+            Assert.AreEqual("-2", parsed.Named["x"]);
+        } finally {
+            System.Globalization.CultureInfo.CurrentCulture = previousCulture;
+        }
+    }
+
     struct TestStruct {
         public string firstname;
         public string surname;
