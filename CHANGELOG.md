@@ -98,3 +98,8 @@
 - Fixed negative positional numbers being interpreted as flags, causing optional arguments to fall back to their defaults.
 - Supports negative integers, decimals and scientific notation while preserving named arguments and nonnumeric flags/shorthands. Negative numeric tokens are now reserved for values rather than numeric flag names.
 - Added regression tests for negative coordinates, quoted and named values, and mixed flags under different cultures.
+
+## [1.9.16] - 16/10/2026
+- Fixed JSON array argument binding by wrapping arrays internally before Unity deserialization, supporting one-dimensional arrays of Unity-serializable elements without changing command syntax or public APIs.
+- Added regression coverage for multiline arrays of choice objects, empty arrays, and non-array input.
+- Added escaped quote and backslash handling in quoted command strings and JSON tokenization; JSON escapes are preserved for deserialization.

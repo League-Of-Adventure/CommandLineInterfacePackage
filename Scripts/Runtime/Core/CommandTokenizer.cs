@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -24,7 +24,7 @@ namespace Louis.CustomPackages.CommandLineInterface.Core {
             for(int i = 0; i < input.Length; i++) {
                 char c = input[i];
 
-                if(c == '"') {
+                if(c == '"' && !IsEscaped(input, i)) {
                     sb.Append(c);
                     inQuotes = !inQuotes;
                     continue;
@@ -82,20 +82,40 @@ namespace Louis.CustomPackages.CommandLineInterface.Core {
         /// Normalizes a token by removing extra whitespace and line breaks
         /// inside arrays/objects, but preserves quoted strings and outer structure
         /// </summary>
+        internal static bool IsEscaped(string text, int index) {
+            int backslashes = 0;
+            for(int i = index - 1; i >= 0 && text[i] == '\\'; i--)
+                backslashes++;
+            return (backslashes & 1) != 0;
+        }
+
+        internal static string UnescapeQuotedString(string text) {
+            var result = new StringBuilder(text.Length);
+            for(int i = 0; i < text.Length; i++) {
+                if(text[i] == '\\' && i + 1 < text.Length &&
+                    (text[i + 1] == '"' || text[i + 1] == '\\')) {
+                    result.Append(text[++i]);
+                } else {
+                    result.Append(text[i]);
+                }
+            }
+            return result.ToString();
+        }
         private static string NormalizeToken(string token) {
             int start = token.IndexOfAny(new[] { '{', '[' });
             if(start == -1)
                 return token;
 
-            string prefix = token.Substring(0, start);
-            string body = token.Substring(start);
+            string prefix = string.Empty;
+            string body = token; // Preserve quote state even when brackets occur inside text.
 
             var sb = new StringBuilder();
             bool inQuotes = false;
             bool pendingCommaSpace = false;
 
-            foreach(char c in body) {
-                if(c == '"') {
+            for(int i = 0; i < body.Length; i++) {
+                char c = body[i];
+                if(c == '"' && !IsEscaped(body, i)) {
                     if(pendingCommaSpace) {
                         sb.Append(' ');
                         pendingCommaSpace = false;

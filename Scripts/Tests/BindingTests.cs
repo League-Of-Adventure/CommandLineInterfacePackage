@@ -3,6 +3,75 @@ using NUnit.Framework;
 
 public class BindingTests {
     [Test]
+    public void BindsStringArrayWithEscapedQuotes() {
+        var schema = new CommandSchema().Required<string[]>("items", 0);
+        var tokens = CommandTokenizer.Tokenize(@"test items=[""hello"", ""say \""Hi\"" now""]");
+        var args = CommandBinder.Bind(schema, new ParsedTokens(tokens[1..], schema.Shorthands));
+        CollectionAssert.AreEqual(new[] { "hello", "say \"Hi\" now" }, args.Get<string[]>("items"));
+    }
+
+    [Test]
+    public void BindsBooleanArray() {
+        var schema = new CommandSchema().Required<bool[]>("items", 0);
+        var tokens = CommandTokenizer.Tokenize("test items=[true,false]");
+        var args = CommandBinder.Bind(schema, new ParsedTokens(tokens[1..], schema.Shorthands));
+        CollectionAssert.AreEqual(new[] { true, false }, args.Get<bool[]>("items"));
+    }
+
+    [Test]
+    public void BindsFloatArray() {
+        var schema = new CommandSchema().Required<float[]>("items", 0);
+        var tokens = CommandTokenizer.Tokenize("test items=[1.5,-2.25]");
+        var args = CommandBinder.Bind(schema, new ParsedTokens(tokens[1..], schema.Shorthands));
+        CollectionAssert.AreEqual(new[] { 1.5f, -2.25f }, args.Get<float[]>("items"));
+    }
+
+    [TestCase(@"say ""He said \""hello\""; # [stay]""", "He said \"hello\"; # [stay]")]
+    [TestCase(@"say dialogue=""C:\\Temp\file""", @"C:\Temp\file")]
+    public void BindsEscapedQuotedString(string command, string expected) {
+        var schema = new CommandSchema().Required<string>("dialogue", 0);
+        var tokens = CommandTokenizer.Tokenize(command);
+        var args = CommandBinder.Bind(schema, new ParsedTokens(tokens[1..], schema.Shorthands));
+        Assert.AreEqual(expected, args.Get<string>("dialogue"));
+    }
+
+    [System.Serializable]
+    public struct ChoiceOption {
+        public string buttonText;
+        public int stepIndex;
+    }
+
+    [Test]
+    public void BindsMultilineChoiceOptions() {
+        var schema = new CommandSchema().Required<ChoiceOption[]>("options", 0);
+        string command = "multiChoice options=[\n" +
+            "{\"buttonText\": \"Loop to start\", \"stepIndex\": 0},\n" +
+            "{\"buttonText\": \"Go to end\", \"stepIndex\": 2}\n]";
+        var tokens = CommandTokenizer.Tokenize(command);
+        var args = CommandBinder.Bind(schema, new ParsedTokens(tokens[1..], schema.Shorthands));
+        var options = args.Get<ChoiceOption[]>("options");
+        Assert.AreEqual(2, options.Length);
+        Assert.AreEqual("Loop to start", options[0].buttonText);
+        Assert.AreEqual(0, options[0].stepIndex);
+        Assert.AreEqual("Go to end", options[1].buttonText);
+        Assert.AreEqual(2, options[1].stepIndex);
+    }
+
+    [Test]
+    public void BindsEmptyArray() {
+        var schema = new CommandSchema().Required<int[]>("items", 0);
+        var tokens = new ParsedTokens(new[] { "items=[]" }, schema.Shorthands);
+        Assert.IsEmpty(CommandBinder.Bind(schema, tokens).Get<int[]>("items"));
+    }
+
+    [Test]
+    public void RejectsObjectForArrayArgument() {
+        var schema = new CommandSchema().Required<int[]>("items", 0);
+        var tokens = new ParsedTokens(new[] { "items={}" }, schema.Shorthands);
+        Assert.Throws<CommandArgumentException>(() => CommandBinder.Bind(schema, tokens));
+    }
+
+    [Test]
     public void TestingArrayBinding() {
         CommandSchema schema = new CommandSchema()
             .Required<int[]>("param", 0);

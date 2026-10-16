@@ -1,9 +1,31 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace Louis.CustomPackages.CommandLineInterface.Core {
     internal static class CommandBinder {
+        [Serializable]
+        sealed class JsonArrayWrapper<T> {
+            public T[] items;
+        }
+
+        static object DeserializeArray(string json, Type arrayType) {
+            if(arrayType.GetArrayRank() != 1)
+                throw new NotSupportedException("Only one-dimensional arrays are supported.");
+
+            string trimmed = json.Trim();
+            if(!trimmed.StartsWith("[") || !trimmed.EndsWith("]"))
+                throw new FormatException("Expected a JSON array enclosed in [ and ].");
+
+            Type wrapperType = typeof(JsonArrayWrapper<>)
+                .MakeGenericType(arrayType.GetElementType());
+            object wrapper = JsonUtility.FromJson(
+                "{\"items\":" + trimmed + "}", wrapperType);
+
+            return wrapperType.GetField(nameof(JsonArrayWrapper<int>.items))
+                .GetValue(wrapper)
+                ?? throw new FormatException("Could not deserialize the JSON array.");
+        }
         public static BoundArgs Bind(CommandSchema schema, ParsedTokens tokens) {
             var values = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
@@ -32,6 +54,8 @@ namespace Louis.CustomPackages.CommandLineInterface.Core {
 
                 if (raw.StartsWith('"') && raw.EndsWith('"')) {
                     raw = raw[1..^1];
+                    if(arg.Type == typeof(string))
+                        raw = CommandTokenizer.UnescapeQuotedString(raw);
                 }
 
                 // Type conversion
@@ -40,8 +64,8 @@ namespace Louis.CustomPackages.CommandLineInterface.Core {
                     if(arg.Type.IsEnum) {
                         converted = Enum.Parse(arg.Type, raw, ignoreCase: true);
                     } else if(arg.Type.IsArray) {
-                        // Array support: T[]
-                        converted = JsonUtility.FromJson(raw, arg.Type);
+                        // JsonUtility requires an object at the root.
+                        converted = DeserializeArray(raw, arg.Type);
                     } else if(arg.Type != typeof(string) && !arg.Type.IsPrimitive) {
                         // JSON object -> Custom class
                         converted = JsonUtility.FromJson(raw, arg.Type);
