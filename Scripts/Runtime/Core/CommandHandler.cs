@@ -56,16 +56,13 @@ namespace Louis.CustomPackages.CommandLineInterface.Core {
                     try {
                         await RunCommand(_commandQueue.Dequeue(), token);
                     } catch(Exception e) {
-                        LogDispatch.Log("CommandManager", e.Message, LogLevel.Error);
+                        LogDispatch.Log("CommandManager", e.ToString(), LogLevel.Error);
                     }
                 } else {
                     await UniTask.Yield();
                 }
 
-                if(token.IsCancellationRequested) {
-                    LogDispatch.Log("CommandManager", $"Cancellation Requested: {_commandQueue.Count} unhandled commands remaining", LogLevel.Warning);
-                    return;
-                }
+                if(token.IsCancellationRequested) return;
             }
         }
 
@@ -91,7 +88,7 @@ namespace Louis.CustomPackages.CommandLineInterface.Core {
                     _commandQueue.Enqueue(command);
                 }
             } catch(Exception e) {
-                LogDispatch.Log("CommandManager", e.Message, LogLevel.Error);
+                LogDispatch.Log("CommandManager", e.ToString(), LogLevel.Error);
             }
         }
 
@@ -107,7 +104,7 @@ namespace Louis.CustomPackages.CommandLineInterface.Core {
                 // Reuse the existing overload that respects ExecuteImmediately.
                 PushCommand(command);
             } catch(Exception e) {
-                LogDispatch.Log("CommandManager", e.Message, LogLevel.Error);
+                LogDispatch.Log("CommandManager", e.ToString(), LogLevel.Error);
             }
         }
 
@@ -120,7 +117,7 @@ namespace Louis.CustomPackages.CommandLineInterface.Core {
         }
 
         async UniTask CancelAll(BoundArgs args, CancellationToken cancellationToken) {
-            LogDispatch.Log("CommandManager", "Cancelling all current actions and clearing command buffer", LogLevel.Warning);
+            LogDispatch.Log("CommandManager", "Cancelling all current actions and clearing command buffer", LogLevel.Info);
             _cts.Cancel();
             _cts = new();
             _commandQueue.Clear();

@@ -56,14 +56,14 @@ namespace com.Louis.CommandLineInterface.Commands {
                 return UniTask.CompletedTask;
             }
             if(_runningOperations.ContainsKey(key)) {
-                LogDispatch.Log(this, $"Cannot run a looping command with key={{{key}}} because one already exists with that key");
+                LogDispatch.Log(this, $"Cannot run a looping command with key={{{key}}} because one already exists with that key", LogLevel.Warning);
                 return UniTask.CompletedTask;
             }
 
             CancellationTokenSource cts = new();
             _runningOperations.Add(key, cts);
             CancellationToken cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, _cts.Token).Token;
-            LogDispatch.Log(this, $"Started looping command with key={{{key}}}");
+            LogDispatch.Log(this, $"Started looping command with key={{{key}}}", LogLevel.Success);
             RunRepeated(command, interval, key, cancellationToken).Forget();
             return UniTask.CompletedTask;
         }
@@ -74,9 +74,9 @@ namespace com.Louis.CommandLineInterface.Commands {
                 cts.Cancel();
                 cts.Dispose(); // Clean up memory allocation
                 _runningOperations.Remove(key);
-                LogDispatch.Log(this, $"Cancelled looping command with key={{{key}}}");
+                LogDispatch.Log(this, $"Cancelled looping command with key={{{key}}}", LogLevel.Info);
             } else {
-                LogDispatch.Log(this, $"Cannot cancel operation with key={{{key}}}. A looping operation with that key does not exist");
+                LogDispatch.Log(this, $"Cannot cancel operation with key={{{key}}}. A looping operation with that key does not exist", LogLevel.Warning);
             }
             return UniTask.CompletedTask;
         }

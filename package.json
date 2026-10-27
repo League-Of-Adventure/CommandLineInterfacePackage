@@ -1,6 +1,6 @@
 {
     "name": "com.leagueofadventure.commandlineinterface",
-    "version": "1.9.16",
+    "version": "1.9.17",
     "displayName": "Command Line Interface Package",
     "description": "A lightweight command line package for Unity.",
     "unity": "2021.1",
